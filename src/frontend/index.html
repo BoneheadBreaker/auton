@@ -20,7 +20,7 @@
 
             async function getMessages() {
                 try {
-                    const response = await fetch("http://localhost:8000/messages");
+                    const response = await fetch("/messages");
 
                     if (!response.ok) {
                         throw new Error(`Unable to fetch messages: ${response.status}`);
@@ -44,9 +44,9 @@
             }
 
             getMessages();
-
+            const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
             var clientId = Math.floor(Math.random() * 1000);
-            var ws = new WebSocket("ws://localhost:8000/ws?client_id=" + clientId);
+            var ws = new WebSocket(wsProtocol + window.location.host + "/ws?client_id=" + clientId);
             
             ws.onmessage = function(event) {
                 appendMessage(event.data);
