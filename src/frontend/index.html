@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Chat</title>
+    </head>
+    <body>
+        <h1>WebSocket Chat</h1>
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <ul id="messages">
+        </ul>
+        <script>
+            // Elements
+            const messagesList = document.getElementById('messages');
+
+
+            async function getMessages() {
+                try {
+                    const response = await fetch("http://localhost:8000/messages");
+
+                    if (!response.ok) {
+                        throw new Error(`Unable to fetch messages: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log("Data received: ", data);
+
+                    data.forEach(msg => appendMessage(msg));
+                    
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                }
+            }
+
+            function appendMessage(text) {
+                const message = document.createElement('li');
+                const content = document.createTextNode(text);
+                message.appendChild(content);
+                messagesList.appendChild(message);
+            }
+
+            getMessages();
+
+            var clientId = Math.floor(Math.random() * 1000);
+            var ws = new WebSocket("ws://localhost:8000/ws?client_id=" + clientId);
+            
+            ws.onmessage = function(event) {
+                appendMessage(event.data);
+            };
+
+            function sendMessage(event) {
+                var input = document.getElementById("messageText");
+                if (input.value.trim() !== '') {
+                    ws.send(input.value);
+                    input.value = '';
+                }
+                event.preventDefault();
+            }
+        </script>
+    </body>
+</html>
